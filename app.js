@@ -50,7 +50,21 @@ async function inferMask(image,sel){
   let best=0;for(let i=1;i<iou_scores.data.length;i++)if(iou_scores.data[i]>iou_scores.data[best])best=i;
   const tensor=masks[0],area=image.width*image.height,offset=best*area,mask=new Uint8Array(area);
   for(let i=0;i<area;i++)mask[i]=tensor.data[offset+i]?255:0;
-  return mask;
+  return repairMask(mask,image.width,image.height);
+}
+function repairMask(source,w,h){
+  // Small closing pass: join tiny cracks without swelling the silhouette.
+  let dilated=new Uint8Array(source.length),closed=new Uint8Array(source.length);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let on=0;for(let dy=-1;dy<=1&&!on;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<w&&ny>=0&&ny<h&&source[ny*w+nx]){on=255;break}}dilated[y*w+x]=on}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let on=255;for(let dy=-1;dy<=1&&on;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx<0||nx>=w||ny<0||ny>=h||!dilated[ny*w+nx]){on=0;break}}closed[y*w+x]=on}
+  // Flood-fill background from the canvas edges. Any remaining zero island is
+  // enclosed by the character silhouette, so it is an unwanted internal hole.
+  const outside=new Uint8Array(source.length),queue=new Int32Array(source.length);let head=0,tail=0;
+  const add=i=>{if(!closed[i]&&!outside[i]){outside[i]=1;queue[tail++]=i}};
+  for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}
+  while(head<tail){const i=queue[head++],x=i%w,y=(i/w)|0;if(x)add(i-1);if(x<w-1)add(i+1);if(y)add(i-w);if(y<h-1)add(i+w)}
+  for(let i=0;i<closed.length;i++)if(!closed[i]&&!outside[i])closed[i]=255;
+  return closed;
 }
 function trackedBox(mask,w,h,previous){
   let x0=w,y0=h,x1=0,y1=0,count=0;
