@@ -31,19 +31,26 @@
         <div class="canvas-wrap" id="canvasWrap">
           <video id="video" playsinline muted hidden></video>
           <canvas id="canvas"></canvas>
-          <div class="hint" id="hint">対象キャラをドラッグで囲んでください</div>
+          <canvas id="maskCanvas"></canvas>
+          <div class="hint" id="hint">残したいキャラをブラシで塗ってください</div>
         </div>
         <input id="timeline" type="range" min="0" max="1000" value="0" />
       </div>
 
       <aside class="controls panel">
         <div class="step"><span>1</span><div><strong>開始位置</strong><p>タイムラインで切り抜きを始める場面へ</p></div></div>
-        <div class="step"><span>2</span><div><strong>キャラを囲む</strong><p>全身が入るよう少し余裕を持って選択</p></div></div>
+        <div class="step"><span>2</span><div><strong>キャラを塗る</strong><p>残す部分をブラシで塗り、消しゴムで修正</p></div></div>
+        <div class="brush-tools">
+          <button id="paintButton" class="tool active">ブラシ</button>
+          <button id="eraseButton" class="tool">消しゴム</button>
+          <button id="clearButton" class="tool">クリア</button>
+        </div>
+        <div class="field"><label for="brushSize">ブラシサイズ <b id="brushSizeValue">32px</b></label><input id="brushSize" type="range" min="6" max="100" value="32" /></div>
         <div class="field"><label for="duration">出力時間 <b id="durationValue">3秒</b></label><input id="duration" type="range" min="1" max="10" value="3" /></div>
-        <div class="field"><label>輪郭AI</label><p class="model-note" id="modelStatus">初回プレビュー時にモデルを読み込みます</p></div>
+        <div class="field"><label>Cutie追跡AI</label><p class="model-note" id="modelStatus">初回書き出し時に約148MBのモデルを読み込みます</p></div>
         <div class="field"><label for="softness">輪郭のなじませ <b id="softnessValue">2px</b></label><input id="softness" type="range" min="0" max="6" value="2" /></div>
         <div class="field"><label for="fps">フレームレート</label><select id="fps"><option>12</option><option selected>15</option><option>24</option></select></div>
-        <button id="previewButton" class="secondary" disabled>1フレームをプレビュー</button>
+        <button id="previewButton" class="secondary" disabled>初期マスクをプレビュー</button>
         <button id="exportButton" class="primary" disabled>WebMを書き出す</button>
         <p class="privacy">GIFが必要な場合は、出力したWebMを動画編集ソフトや変換サービスでGIF化できます。</p>
         <p class="privacy">処理はブラウザ内で完結。動画をサーバーへ送信しません。</p>
@@ -58,11 +65,13 @@
 
     <section class="about">
       <h2>きれいに抜くコツ</h2>
-      <div class="tips"><article><b>短いカットから</b><p>カメラ切り替えをまたがない2〜5秒が安定します。</p></article><article><b>余白を少しだけ</b><p>対象キャラを囲みつつ、他の人物は入れないのがコツ。</p></article><article><b>背景との差を使う</b><p>許容範囲を調整して、髪や服を残しつつ背景を減らします。</p></article></div>
-      <p class="notice">SlimSAMによる輪郭推論を各フレームに適用します。人物の重なりやカット切替では選択し直してください。権利を持つ、または利用許諾のある動画に使用してください。</p>
+      <div class="tips"><article><b>短いカットから</b><p>カメラ切り替えをまたがない2〜5秒が安定します。</p></article><article><b>全身を塗る</b><p>髪・手足・服をひと続きに塗ると追跡が安定します。</p></article><article><b>背景は塗らない</b><p>キャラの内側だけを塗り、はみ出した部分は消しゴムで修正します。</p></article></div>
+      <p class="notice">初期マスクは手動ブラシで確定し、以降のフレームはCutieが時間方向に追跡します。Chrome / EdgeのWebGPU対応環境を推奨します。権利を持つ、または利用許諾のある動画に使用してください。</p>
     </section>
   </main>
   <footer>Anime Cutout Lab — runs entirely in your browser.</footer>
-  <script type="module" src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/ort.webgpu.min.js"></script>
+  <script src="cutie.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
