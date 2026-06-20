@@ -43,8 +43,8 @@ async function loadSam(){
 async function inferMask(image,sel){
   await loadSam();
   const temp=document.createElement('canvas');temp.width=image.width;temp.height=image.height;temp.getContext('2d').putImageData(image,0,0);
-  const raw=RawImage.fromCanvas(temp),box=[sel.x,sel.y,sel.x+sel.w,sel.y+sel.h];
-  const inputs=await processor(raw,{input_boxes:[[box]]});
+  const raw=RawImage.fromCanvas(temp),point=[sel.x+sel.w/2,sel.y+sel.h/2];
+  const inputs=await processor(raw,{input_points:[[point]]});
   const {pred_masks,iou_scores}=await model(inputs);
   const masks=await processor.post_process_masks(pred_masks,inputs.original_sizes,inputs.reshaped_input_sizes);
   let best=0;for(let i=1;i<iou_scores.data.length;i++)if(iou_scores.data[i]>iou_scores.data[best])best=i;
@@ -61,9 +61,9 @@ function trackedBox(mask,w,h,previous){
 async function cutout(image,sel){const mask=await inferMask(image,sel),d=image.data;for(let i=0;i<mask.length;i++)d[i*4+3]=mask[i];ctx.clearRect(0,0,canvas.width,canvas.height);ctx.putImageData(image,0,0);return trackedBox(mask,image.width,image.height,sel)}
 
 $('#previewButton').onclick=async()=>{
-  if(busy)return;busy=true;toggle(true);$('#hint').textContent='人物の輪郭を解析中…';
+  if(busy)return;busy=true;toggle(true);$('#hint').textContent='人物の輪郭を解析中…';await new Promise(requestAnimationFrame);
   try{const img=new ImageData(new Uint8ClampedArray(frameImage.data),frameImage.width,frameImage.height);await cutout(img,selection);$('#hint').textContent='プレビュー中。人物以外が透明になっています'}
-  catch(e){console.error(e);$('#hint').textContent='輪郭解析に失敗しました'}finally{busy=false;toggle(false)}
+  catch(e){console.error(e);$('#hint').textContent=`輪郭解析に失敗しました: ${e.message||e}`}finally{busy=false;toggle(false)}
 };
 async function processFrames(onFrame){
   if(busy)return;busy=true;toggle(true);const start=video.currentTime,dur=Math.min(+controls.duration.value,video.duration-start),fps=+controls.fps.value,total=Math.max(1,Math.floor(dur*fps));let tracked={...selection};
