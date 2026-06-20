@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#17141f" />
+  <title>Anime Cutout Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">LOCAL-FIRST VIDEO TOOL</p>
+      <h1>Anime Cutout <span>Lab</span></h1>
+      <p class="lead">動画のキャラクターを囲んで、背景を抜いたアニメーションに。動画は端末内だけで処理します。</p>
+    </header>
+
+    <section class="panel upload-panel" id="dropZone">
+      <input id="fileInput" type="file" accept="video/*" hidden />
+      <button id="pickButton" class="primary">動画を選ぶ</button>
+      <p>または動画ファイルをここへドロップ</p>
+      <small>まずは10秒以内・720p以下がおすすめ</small>
+    </section>
+
+    <section id="workspace" class="workspace hidden">
+      <div class="stage-card">
+        <div class="stage-toolbar">
+          <div><strong id="fileName">video.mp4</strong><small id="videoMeta"></small></div>
+          <button id="changeButton" class="ghost">別の動画</button>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <video id="video" playsinline muted hidden></video>
+          <canvas id="canvas"></canvas>
+          <div class="hint" id="hint">対象キャラをドラッグで囲んでください</div>
+        </div>
+        <input id="timeline" type="range" min="0" max="1000" value="0" />
+      </div>
+
+      <aside class="controls panel">
+        <div class="step"><span>1</span><div><strong>開始位置</strong><p>タイムラインで切り抜きを始める場面へ</p></div></div>
+        <div class="step"><span>2</span><div><strong>キャラを囲む</strong><p>全身が入るよう少し余裕を持って選択</p></div></div>
+        <div class="field"><label for="duration">出力時間 <b id="durationValue">3秒</b></label><input id="duration" type="range" min="1" max="10" value="3" /></div>
+        <div class="field"><label for="tolerance">色の許容範囲 <b id="toleranceValue">42</b></label><input id="tolerance" type="range" min="15" max="90" value="42" /></div>
+        <div class="field"><label for="softness">輪郭のなじませ <b id="softnessValue">2px</b></label><input id="softness" type="range" min="0" max="6" value="2" /></div>
+        <div class="field"><label for="fps">フレームレート</label><select id="fps"><option>12</option><option selected>15</option><option>24</option></select></div>
+        <button id="previewButton" class="secondary" disabled>1フレームをプレビュー</button>
+        <button id="exportButton" class="primary" disabled>WebMを書き出す</button>
+        <p class="privacy">GIFが必要な場合は、出力したWebMを動画編集ソフトや変換サービスでGIF化できます。</p>
+        <p class="privacy">処理はブラウザ内で完結。動画をサーバーへ送信しません。</p>
+      </aside>
+    </section>
+
+    <section id="result" class="result panel hidden">
+      <div><p class="eyebrow">COMPLETE</p><h2>切り抜きができました</h2><p id="resultNote"></p></div>
+      <video id="resultVideo" controls loop muted></video>
+      <a id="downloadLink" class="primary button-link" download>保存する</a>
+    </section>
+
+    <section class="about">
+      <h2>きれいに抜くコツ</h2>
+      <div class="tips"><article><b>短いカットから</b><p>カメラ切り替えをまたがない2〜5秒が安定します。</p></article><article><b>余白を少しだけ</b><p>対象キャラを囲みつつ、他の人物は入れないのがコツ。</p></article><article><b>背景との差を使う</b><p>許容範囲を調整して、髪や服を残しつつ背景を減らします。</p></article></div>
+      <p class="notice">この試作版は色・位置追跡方式です。複雑な背景、重なり、カット切替では手動調整が必要です。権利を持つ、または利用許諾のある動画に使用してください。</p>
+    </section>
+  </main>
+  <footer>Anime Cutout Lab — runs entirely in your browser.</footer>
+  <script src="app.js"></script>
+</body>
+</html>
