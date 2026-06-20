@@ -43,12 +43,22 @@ async function loadSam(){
 async function inferMask(image,sel){
   await loadSam();
   const temp=document.createElement('canvas');temp.width=image.width;temp.height=image.height;temp.getContext('2d').putImageData(image,0,0);
-  const raw=RawImage.fromCanvas(temp),point=[sel.x+sel.w/2,sel.y+sel.h/2];
-  const inputs=await processor(raw,{input_points:[[point]]});
+  const raw=RawImage.fromCanvas(temp);
+  // A single point often makes SAM interpret an anime character's shirt or
+  // hair as the whole object. Spread positive prompts across the selected
+  // figure so the requested object is the complete character.
+  const points=[.16,.34,.52,.70,.86].map(y=>[sel.x+sel.w*.5,sel.y+sel.h*y]);
+  points.push([sel.x+sel.w*.35,sel.y+sel.h*.48],[sel.x+sel.w*.65,sel.y+sel.h*.48]);
+  const inputs=await processor(raw,{input_points:[points]});
   const {pred_masks,iou_scores}=await model(inputs);
   const masks=await processor.post_process_masks(pred_masks,inputs.original_sizes,inputs.reshaped_input_sizes);
-  let best=0;for(let i=1;i<iou_scores.data.length;i++)if(iou_scores.data[i]>iou_scores.data[best])best=i;
-  const tensor=masks[0],area=image.width*image.height,offset=best*area,mask=new Uint8Array(area);
+  const tensor=masks[0],area=image.width*image.height,candidates=iou_scores.data.length;
+  // Prefer the candidate that covers more of the user's box while penalizing
+  // pixels far outside it. This avoids choosing a confident shirt-only mask.
+  const padX=sel.w*.18,padY=sel.h*.18,x0=Math.max(0,sel.x-padX),x1=Math.min(image.width,sel.x+sel.w+padX),y0=Math.max(0,sel.y-padY),y1=Math.min(image.height,sel.y+sel.h+padY);
+  let best=0,bestScore=-Infinity;
+  for(let c=0;c<candidates;c++){let inside=0,outside=0,offset=c*area;for(let y=0;y<image.height;y++)for(let x=0;x<image.width;x++)if(tensor.data[offset+y*image.width+x]){if(x>=x0&&x<=x1&&y>=y0&&y<=y1)inside++;else outside++}const score=inside-outside*.65;if(score>bestScore){bestScore=score;best=c}}
+  const offset=best*area,mask=new Uint8Array(area);
   for(let i=0;i<area;i++)mask[i]=tensor.data[offset+i]?255:0;
   return repairMask(mask,image.width,image.height);
 }
