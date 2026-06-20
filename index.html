@@ -35,6 +35,19 @@
           <div class="hint" id="hint">残したいキャラをブラシで塗ってください</div>
         </div>
         <input id="timeline" type="range" min="0" max="1000" value="0" />
+        <div class="transport">
+          <button id="startJumpButton" class="mini" title="開始位置へ">|◀</button>
+          <button id="prevFrameButton" class="mini" title="1フレーム戻る">−1F</button>
+          <button id="playButton" class="mini play" title="再生・停止">▶ 再生</button>
+          <button id="nextFrameButton" class="mini" title="1フレーム進む">+1F</button>
+          <button id="endJumpButton" class="mini" title="終了位置へ">▶|</button>
+          <output id="timeDisplay">00:00.000</output>
+        </div>
+        <div class="trim-controls">
+          <div><button id="setStartButton" class="mark start">現在位置を開始に</button><b id="startTime">00:00.000</b></div>
+          <div class="trim-line"><span id="trimRange"></span><i id="playhead"></i></div>
+          <div><button id="setEndButton" class="mark end">現在位置を終了に</button><b id="endTime">00:00.000</b></div>
+        </div>
       </div>
 
       <aside class="controls panel">
@@ -46,7 +59,7 @@
           <button id="clearButton" class="tool">クリア</button>
         </div>
         <div class="field"><label for="brushSize">ブラシサイズ <b id="brushSizeValue">32px</b></label><input id="brushSize" type="range" min="6" max="100" value="32" /></div>
-        <div class="field"><label for="duration">出力時間 <b id="durationValue">3秒</b></label><input id="duration" type="range" min="1" max="10" value="3" /></div>
+        <p class="range-note">書き出し範囲 <b id="rangeDuration">0.0秒</b></p>
         <div class="field"><label>Cutie追跡AI</label><p class="model-note" id="modelStatus">初回書き出し時に約148MBのモデルを読み込みます</p></div>
         <div class="field"><label for="softness">輪郭のなじませ <b id="softnessValue">2px</b></label><input id="softness" type="range" min="0" max="6" value="2" /></div>
         <div class="field"><label for="fps">フレームレート</label><select id="fps"><option>12</option><option selected>15</option><option>24</option></select></div>
