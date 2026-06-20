@@ -40,7 +40,7 @@
         <div class="step"><span>1</span><div><strong>開始位置</strong><p>タイムラインで切り抜きを始める場面へ</p></div></div>
         <div class="step"><span>2</span><div><strong>キャラを囲む</strong><p>全身が入るよう少し余裕を持って選択</p></div></div>
         <div class="field"><label for="duration">出力時間 <b id="durationValue">3秒</b></label><input id="duration" type="range" min="1" max="10" value="3" /></div>
-        <div class="field"><label for="tolerance">色の許容範囲 <b id="toleranceValue">42</b></label><input id="tolerance" type="range" min="15" max="90" value="42" /></div>
+        <div class="field"><label>輪郭AI</label><p class="model-note" id="modelStatus">初回プレビュー時にモデルを読み込みます</p></div>
         <div class="field"><label for="softness">輪郭のなじませ <b id="softnessValue">2px</b></label><input id="softness" type="range" min="0" max="6" value="2" /></div>
         <div class="field"><label for="fps">フレームレート</label><select id="fps"><option>12</option><option selected>15</option><option>24</option></select></div>
         <button id="previewButton" class="secondary" disabled>1フレームをプレビュー</button>
@@ -59,10 +59,10 @@
     <section class="about">
       <h2>きれいに抜くコツ</h2>
       <div class="tips"><article><b>短いカットから</b><p>カメラ切り替えをまたがない2〜5秒が安定します。</p></article><article><b>余白を少しだけ</b><p>対象キャラを囲みつつ、他の人物は入れないのがコツ。</p></article><article><b>背景との差を使う</b><p>許容範囲を調整して、髪や服を残しつつ背景を減らします。</p></article></div>
-      <p class="notice">この試作版は色・位置追跡方式です。複雑な背景、重なり、カット切替では手動調整が必要です。権利を持つ、または利用許諾のある動画に使用してください。</p>
+      <p class="notice">SlimSAMによる輪郭推論を各フレームに適用します。人物の重なりやカット切替では選択し直してください。権利を持つ、または利用許諾のある動画に使用してください。</p>
     </section>
   </main>
   <footer>Anime Cutout Lab — runs entirely in your browser.</footer>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
